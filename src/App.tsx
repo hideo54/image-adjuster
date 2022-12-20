@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
@@ -14,7 +14,6 @@ const BaseImg = styled.img<{
 }>`
   position: absolute;
   inset: 1em;
-  width: 80%;
   margin: 0 auto;
   opacity: ${props => props.opacity};
 `;
@@ -27,7 +26,6 @@ const OverlayImg = styled.img<{
 }>`
   position: absolute;
   inset: 1em;
-  width: 80%;
   margin: 0 auto;
   opacity: ${props => props.opacity};
   transform:
@@ -39,7 +37,8 @@ const OverlayImg = styled.img<{
 const OpacityInput: React.FC<{
   value: number;
   setFunc: (n: number) => void;
-}> = ({ value, setFunc}) => (
+  disabled: boolean;
+}> = ({ value, setFunc, disabled }) => (
   <input
     type='range'
     value={value}
@@ -47,6 +46,7 @@ const OpacityInput: React.FC<{
     max={1}
     step={0.1}
     onChange={e => setFunc(e.target.valueAsNumber)}
+    disabled={disabled}
   />
 );
 
@@ -66,6 +66,7 @@ const App = () => {
   const [deg, setDeg] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [baseOpacity, setBaseOpacity] = useState(0.5);
+  const [enableBlink, setEnableBlink] = useState(false);
   const [overlayOpacity, setOverlayOpacity] = useState(0.5);
   const baseImagePath = indexToImagePath(currentIndex);
   const overlayImagePath = indexToImagePath(currentIndex + 1);
@@ -74,8 +75,21 @@ const App = () => {
   useHotkeys('right', () => setX(n => n + 1), commonOption);
   useHotkeys('up', () => setY(n => n - 1), commonOption);
   useHotkeys('down', () => setY(n => n + 1), commonOption);
-  useHotkeys('w', () => setDeg(d => d - 1), commonOption);
-  useHotkeys('s', () => setDeg(d => d + 1), commonOption);
+  useHotkeys('w', () => setDeg(d => Math.floor(10 * d - 1) / 10), commonOption);
+  useHotkeys('s', () => setDeg(d => Math.floor(10 * d + 1) / 10), commonOption);
+  useEffect(() => {
+    if (enableBlink) {
+      const blinker = setInterval(() => {
+        setBaseOpacity(n => n === 1 ? 0 : 1);
+        setOverlayOpacity(n => n === 0 ? 1 : 0);
+      }, 1000);
+      return () => {
+        clearInterval(blinker);
+        setBaseOpacity(0.5);
+        setOverlayOpacity(0.5);
+      };
+    }
+  }, [enableBlink]);
   return (
     <main>
       <h1>Image Adjuster</h1>
@@ -93,24 +107,39 @@ const App = () => {
           <div className='item'>
             <div>{baseImagePath.split('/')[1]}</div>
             <div>
-              <OpacityInput value={baseOpacity} setFunc={setBaseOpacity} />
+               <OpacityInput
+                value={baseOpacity}
+                setFunc={setBaseOpacity}
+                disabled={enableBlink}
+              />
             </div>
           </div>
           <div className='item'>
             <div>{overlayImagePath.split('/')[1]}</div>
             <div>
-              <OpacityInput value={overlayOpacity} setFunc={setOverlayOpacity} />
+              <OpacityInput
+                value={overlayOpacity}
+                setFunc={setOverlayOpacity}
+                disabled={enableBlink}
+              />
             </div>
           </div>
         </ContainerDiv>
+        <div>
+          <button onClick={() => setEnableBlink(b => !b)}>
+            {enableBlink ? 'Stop Blink' : 'Start Blink'}
+          </button>
+        </div>
         <ContainerDiv>
           <button
             className='item'
             onClick={() => {
+              console.log(`Index ${currentIndex} -> ${currentIndex + 1}: x = ${x}, y = ${y}, deg = ${deg}`)
               setCurrentIndex(n => n - 1);
               setX(0);
               setY(0);
               setDeg(0);
+              setEnableBlink(false);
             }}
             disabled={currentIndex <= 0}
           >
@@ -119,10 +148,12 @@ const App = () => {
           <button
             className='item'
             onClick={() => {
+              console.log(`Index ${currentIndex} -> ${currentIndex + 1}: x = ${x}, y = ${y}, deg = ${deg}`)
               setCurrentIndex(n => n + 1);
               setX(0);
               setY(0);
               setDeg(0);
+              setEnableBlink(false);
             }}
             disabled={currentIndex >= MAX_INDEX}
           >
