@@ -2,6 +2,8 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+const MAX_INDEX = 53;
+
 const RelativeDiv = styled.div`
   position: relative;
   margin: 0 auto;
@@ -101,10 +103,28 @@ const App = () => {
           </div>
         </ContainerDiv>
         <ContainerDiv>
-          <button className='item' onClick={() => setCurrentIndex(n => n - 1)}>
+          <button
+            className='item'
+            onClick={() => {
+              setCurrentIndex(n => n - 1);
+              setX(0);
+              setY(0);
+              setDeg(0);
+            }}
+            disabled={currentIndex <= 0}
+          >
             Go Back
           </button>
-          <button className='item' onClick={() => setCurrentIndex(n => n + 1)}>
+          <button
+            className='item'
+            onClick={() => {
+              setCurrentIndex(n => n + 1);
+              setX(0);
+              setY(0);
+              setDeg(0);
+            }}
+            disabled={currentIndex >= MAX_INDEX}
+          >
             Go Next
           </button>
         </ContainerDiv>
