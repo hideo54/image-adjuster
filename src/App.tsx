@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const RelativeDiv = styled.div`
   position: relative;
@@ -44,6 +45,12 @@ const App = () => {
   const [overlayOpacity, setOverlayOpacity] = useState(0.5);
   const baseImagePath = indexToImagePath(currentIndex);
   const overlayImagePath = indexToImagePath(currentIndex + 1);
+  useHotkeys('left', () => setX(n => n - 1));
+  useHotkeys('right', () => setX(n => n + 1));
+  useHotkeys('up', () => setY(n => n - 1));
+  useHotkeys('down', () => setY(n => n + 1));
+  useHotkeys('w', () => setDeg(d => d - 1));
+  useHotkeys('s', () => setDeg(d => d + 1));
   return (
     <main>
       <h1>Image Adjuster</h1>
