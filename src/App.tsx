@@ -34,6 +34,28 @@ const OverlayImg = styled.img<{
     rotate(${props => props.deg}deg);
 `;
 
+const OpacityInput: React.FC<{
+  value: number;
+  setFunc: (n: number) => void;
+}> = ({ value, setFunc}) => (
+  <input
+    type='range'
+    value={value}
+    min={0}
+    max={1}
+    step={0.1}
+    onChange={e => setFunc(e.target.valueAsNumber)}
+  />
+);
+
+const ContainerDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  & > .item {
+    margin: 0 1em;
+  }
+`;
+
 const indexToImagePath = (n: number) => `indexed_images/${n.toString().padStart(2, '0')}.jpg`;
 
 const App = () => {
@@ -64,6 +86,28 @@ const App = () => {
       </section>
       <section>
         <h2>Overlay</h2>
+        <ContainerDiv>
+          <div className='item'>
+            <div>{baseImagePath.split('/')[1]}</div>
+            <div>
+              <OpacityInput value={baseOpacity} setFunc={setBaseOpacity} />
+            </div>
+          </div>
+          <div className='item'>
+            <div>{overlayImagePath.split('/')[1]}</div>
+            <div>
+              <OpacityInput value={overlayOpacity} setFunc={setOverlayOpacity} />
+            </div>
+          </div>
+        </ContainerDiv>
+        <ContainerDiv>
+          <button className='item' onClick={() => setCurrentIndex(n => n - 1)}>
+            Go Back
+          </button>
+          <button className='item' onClick={() => setCurrentIndex(n => n + 1)}>
+            Go Next
+          </button>
+        </ContainerDiv>
         <RelativeDiv>
           <BaseImg
             src={baseImagePath}
